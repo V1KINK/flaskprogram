@@ -1,3 +1,4 @@
+import logging
 from redis import StrictRedis
 
 
@@ -17,6 +18,7 @@ class Config(object):
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
     SESSION_PERMANENT = False
     PERMANENT_SESSION_LIFETIME = 86400 * 2
+    LOG_LEVEL = logging.DEBUG
 
 
 class DevelopmentConfig(Config):
@@ -26,7 +28,8 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     """生产模式下的配置"""
-    pass
+    DEBUG = False
+    LOG_LEVEL = logging.ERROR
 
 
 config = {
