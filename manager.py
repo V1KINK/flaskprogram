@@ -4,6 +4,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
 from redis import StrictRedis
 
 
@@ -31,7 +32,9 @@ db = SQLAlchemy(app)
 redis_store = redis.StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
 CSRFProtect(app)
 Session(app)
-Manager(app)
+manager = Manager(app)
+Migrate(app, db)
+manager.add_command("db", MigrateCommand)
 
 
 @app.route("/")
@@ -41,4 +44,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run()
+    manager.run()
