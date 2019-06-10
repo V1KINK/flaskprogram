@@ -15,6 +15,16 @@ db = SQLAlchemy()
 redis_store = None  # type: StrictRedis
 
 
+def setup_log(config_name):
+    """配置日志"""
+
+    logging.basicConfig(level=config[config_name].LOG_LEVEL)
+    file_log_handler = RotatingFileHandler("logs/log", maxBytes=1024 * 1024 * 100, backupCount=10)
+    formatter = logging.Formatter("%(levelname)s %(filename)s: %(lineno)d %(message)s")
+    file_log_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(file_log_handler)
+
+
 def create_app(config_name):
     """通过传入不同的配置名字，初始化其对应配置的应用实例"""
     app = Flask(__name__)
@@ -25,21 +35,12 @@ def create_app(config_name):
     CSRFProtect(app)
     Session(app)
 
+    setup_log(config_name)
+
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
-
-    setup_log(config_name)
-    app = Flask(__name__)
 
     return app
 
 
-def setup_log(config_name):
-    """配置日志"""
-
-    logging.basicConfig(level=config[config_name].LOG_LEVEL)
-    file_log_handler = RotatingFileHandler("logs/log", maxBytes=1024 * 1024 * 100, backupCount=10)
-    formatter = logging.Formatter("%(levelname)s %(filename)s: %(lineno)d %(message)s")
-    file_log_handler.setFormatter(formatter)
-    logging.getLogger().addHandler(file_log_handler)
 
