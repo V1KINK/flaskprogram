@@ -32,6 +32,12 @@ class ProductionConfig(Config):
     LOG_LEVEL = logging.ERROR
 
 
+class TestingConfig(Config):
+    """测试模式下的配置"""
+    DEBUG = True
+    TESTING = True
+
+
 config = {
     "development": DevelopmentConfig,
     "production": ProductionConfig
