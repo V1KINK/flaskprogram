@@ -67,24 +67,7 @@ $(function(){
             }
         }
 
-        // 发起修改分类请求
-        $.ajax({
-            url:"/admin/news_type",
-            method: "post",
-            headers: {
-                "X-CSRFToken": getCookie("csrf_token")
-            },
-            data: JSON.stringify(params),
-            contentType: "application/json",
-            success: function (resp) {
-                if (resp.errno == "0") {
-                    // 刷新当前界面
-                    location.reload();
-                }else {
-                    $error.html(resp.errmsg).show();
-                }
-            }
-        })
+        // TODO 发起修改分类请求
 
     })
 })
