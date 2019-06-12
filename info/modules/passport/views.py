@@ -1,6 +1,7 @@
 # import logging
 from flask import abort
 from flask import current_app
+from flask import make_response
 from flask import request
 
 from info import constants
@@ -26,4 +27,6 @@ def get_image_code():
         # logging.error(e)
         abort(500)
     # 5.返回验证码图片
-    return image
+    response = make_response(image)
+    response.handers["Content-Type"] = "image/jpg"
+    return response
