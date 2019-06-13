@@ -19,10 +19,11 @@ from . import passport_blu
 from info.utils.captcha.captcha import captcha
 
 
-@passport_blu.route("/register", method="POST")
+@passport_blu.route("/register", methods=["POST"])
 def register():
     # 注册的逻辑
     # 1. 获取参数
+
     params_dict = request.json
     mobile = params_dict.get("mobile")
     smscode = params_dict.get("smscode")
@@ -57,6 +58,7 @@ def register():
     except Exception as e:
         current_app.logging.error(e)
         db.session.rollback()
+        return jsonify(errno=RET.DBERR, errmsg="注册失败")
     # 7. 返回响应
     session["mobile"] = user.mobile
     session["user_id"] = user.id
@@ -65,7 +67,7 @@ def register():
     return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
-@passport_blu.route("/sms_code")
+@passport_blu.route("/sms_code", methods=["POST"])
 def send_sms_code():
     # params_dict = json.loads(request.data)
     params_dict = request.json
