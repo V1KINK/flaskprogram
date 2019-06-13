@@ -37,6 +37,14 @@ def create_app(config_name):
     CSRFProtect(app)
     Session(app)
 
+    @app.after_request
+    def after_request(response):
+        # 生成随机的csrf_token的值
+        csrf_token = generate_csrf()
+        # 设置一个cookie
+        response.set_cookie("csrf_token", csrf_token)
+        return response
+
     setup_log(config_name)
 
     from info.modules.index import index_blu
