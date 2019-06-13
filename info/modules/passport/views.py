@@ -2,18 +2,67 @@
 import random
 import re
 
+from datetime import datetime
 from flask import abort, jsonify
 from flask import current_app
 from flask import json
 from flask import make_response
 from flask import request
+from flask import session
 
-from info import constants
+from info import constants, db
 from info import redis_store
 from info.libs.yuntongxun.sms import CCP
+from info.models import User
 from info.utils.response_code import RET
 from . import passport_blu
 from info.utils.captcha.captcha import captcha
+
+
+@passport_blu.route("/register", method="POST")
+def register():
+    # 注册的逻辑
+    # 1. 获取参数
+    params_dict = request.json
+    mobile = params_dict.get("mobile")
+    smscode = params_dict.get("smscode")
+    password = params_dict.get("password")
+    # 2. 校验参数
+    if not all([mobile, smscode, password]):
+        return jsonify(errno=RET.PARAMERR, errmsg="请确认参数")
+    if not re.match("1[35678]\\d{9}", mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg="请填写正确的手机号")
+
+    # if not re.match("[0123456789]{9}"):
+    #     return jsonify(errno=RET.PARAMERR, errmsg="验证码有误")
+    #
+    # if not re.match("[]")
+    # 3. 取到服务器保存的真实的短信验证码内容
+    try:
+        real_sms_code = redis_store.get("SMS_" + mobile)
+    except Exception as e:
+        current_app.logging.error(e)
+    # 4. 校验用户输入的短信验证码内容和真实验证码内容是否一致
+    if real_sms_code.upper != smscode.upper:
+        return jsonify(errno=RET.DATAERR, errmsg="请填写正确的短信验证码")
+    # 5. 如果一致，初始化 User 模型，并且赋值属性
+    user = User()
+    user.mobile = mobile
+    user.password = password
+    user.last_login = datetime.now
+    # 6. 将 user 模型添加数据库
+    try:
+        db.session.add(user)
+        db.commit()
+    except Exception as e:
+        current_app.logging.error(e)
+        db.session.rollback()
+    # 7. 返回响应
+    session["mobile"] = user.mobile
+    session["user_id"] = user.id
+    session["nick_name"] = user.nick_name
+
+    return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
 @passport_blu.route("/sms_code")
