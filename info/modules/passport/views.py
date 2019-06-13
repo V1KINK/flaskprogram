@@ -1,4 +1,5 @@
 # import logging
+import random
 import re
 
 from flask import abort, jsonify
@@ -77,5 +78,5 @@ def get_image_code():
         abort(500)
     # 5.返回验证码图片
     response = make_response(image)
-    response.handers["Content-Type"] = "image/jpg"
+    response.headers["Content-Type"] = "image/jpg"
     return response
