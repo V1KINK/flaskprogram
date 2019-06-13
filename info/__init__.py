@@ -33,7 +33,7 @@ def create_app(config_name):
     app.config.from_object(Config)
     db.init_app(app)
     global redis_store
-    redis_store = redis.StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
+    redis_store = redis.StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT, decode_responses=True)
     CSRFProtect(app)
     Session(app)
 
