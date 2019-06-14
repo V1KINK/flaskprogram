@@ -83,7 +83,6 @@ def login():
     return jsonify(errno=RET.OK, errmsg="登录成功")
 
 
-
 @passport_blu.route("/register", methods=["POST"])
 def register():
     # 注册的逻辑
@@ -135,12 +134,13 @@ def register():
 
 @passport_blu.route("/sms_code", methods=["POST"])
 def send_sms_code():
+    # return jsonify(errno=RET.OK, errmsg="发送成功")
     # params_dict = json.loads(request.data)
     params_dict = request.json
 
     mobile = params_dict.get("mobile")
-    image_code = params_dict.get("image_dict")
-    image_code_id = params_dict.get("iamge_dict_id")
+    image_code = params_dict.get("image_code")
+    image_code_id = params_dict.get("image_code_id")
 
     if not all([mobile, image_code, image_code_id]):
         return jsonify(errorno=RET.PARAMERR, errmsg="参数错误")

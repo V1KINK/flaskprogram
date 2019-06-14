@@ -3,7 +3,7 @@ from flask import render_template
 from flask import session
 
 from info import redis_store
-from info.models import User
+from info.models import User, News
 from . import index_blu
 
 
@@ -15,7 +15,7 @@ def index():
     1. 如果用户已经登录，将当前登录用户的数据传到模板中，供模板显示
     :return:
     """
-
+    # 显示用户是否登陆的逻辑
     # 取到用户id
     user_id = session.get("user_id", None)
     user = None
@@ -25,6 +25,16 @@ def index():
             user = User.query.get(user_id)
         except Exception as e:
             current_app.logger.error(e)
+
+    news_list = []
+    try:
+        news_list = News.query.order_by(News.clicks.desc()).limit(6)
+    except Exception as e:
+        current_app.logger.error(e)
+
+    news_dict_li = []
+    for news in news_list:
+        news_dict_li.append(news.to_basic_dict())
 
     data = {
         "user": user.to_dict() if user else None
