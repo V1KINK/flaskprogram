@@ -79,6 +79,17 @@ def login():
     session["mobile"] = user.mobile
     session["nick_name"] = user.nick_name
 
+    # user.last_login = datetime.now()
+
+    # 如果在视图函数中，对模型身上的属性有修改，那么需要commit到数据库保存
+    # 但是其实可以不用自己去写 db.session.commit(),前提是对SQLAlchemy有过相关配置
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+
     # 5. 响应
     return jsonify(errno=RET.OK, errmsg="登录成功")
 
@@ -98,30 +109,27 @@ def register():
     if not re.match("1[35678]\\d{9}", mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="请填写正确的手机号")
 
-    # if not re.match("[0123456789]{9}"):
-    #     return jsonify(errno=RET.PARAMERR, errmsg="验证码有误")
-    #
-    # if not re.match("[]")
     # 3. 取到服务器保存的真实的短信验证码内容
     try:
         real_sms_code = redis_store.get("SMS_" + mobile)
     except Exception as e:
         current_app.logging.error(e)
     # 4. 校验用户输入的短信验证码内容和真实验证码内容是否一致
-    if real_sms_code.upper != smscode.upper:
+    if real_sms_code != smscode:
+        print(real_sms_code, smscode)
         return jsonify(errno=RET.DATAERR, errmsg="请填写正确的短信验证码")
     # 5. 如果一致，初始化 User 模型，并且赋值属性
     user = User()
     user.mobile = mobile
     user.nick_name = mobile
     user.password = password
-    user.last_login = datetime.now
+    user.last_login = datetime.now()
     # 6. 将 user 模型添加数据库
     try:
         db.session.add(user)
-        db.commit()
+        db.session.commit()
     except Exception as e:
-        current_app.logging.error(e)
+        current_app.logger.error(e)
         db.session.rollback()
         return jsonify(errno=RET.DBERR, errmsg="数据存储失败")
     # 7. 返回响应
@@ -149,7 +157,7 @@ def send_sms_code():
         return jsonify(errorno=RET.PARAMERR, errmsg="手机号码格式不正确")
 
     try:
-        real_image_code = redis_store.get("ImageCodeId_" + image_code_id)
+        real_image_code = redis_store.get("imageCodeId_" + image_code_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errerno=RET.DBERR, errmsg="数据查询失败")
@@ -163,10 +171,10 @@ def send_sms_code():
     sms_code_str = "%06d" % random.randint(0, 99999999)
     current_app.logger.debug("短信验证码的内容是 %s" % sms_code_str)
 
-    result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 6], "1")
-
-    if result != 0:
-        return jsonify(errno=RET.THIRDERR, errmsg="发送失败")
+    # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 6], "1")
+    #
+    # if result != 0:
+    #     return jsonify(errno=RET.THIRDERR, errmsg="发送失败")
 
     try:
         redis_store.set("SMS_" + mobile, sms_code_str, constants.SMS_CODE_REDIS_EXPIRES)
@@ -186,6 +194,7 @@ def get_image_code():
         abort(403)
     # 3.生成图片验证码
     name, text, image = captcha.generate_captcha()
+    current_app.logger.debug("图片验证码内容是：%s" % text)
     # 4.保存参数验证码键值对到redis
     try:
         redis_store.set("imageCodeId_" + image_code_id, text, constants.IMAGE_CODE_REDIS_EXPIRES)

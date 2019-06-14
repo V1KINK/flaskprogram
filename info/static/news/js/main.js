@@ -4,7 +4,7 @@ $(function(){
 	$('.login_btn').click(function(){
         $('.login_form_con').show();
 	})
-	
+
 	// 点击关闭按钮关闭登录框或者注册框
 	$('.shutoff').click(function(){
 		$(this).closest('form').hide();
@@ -81,7 +81,7 @@ $(function(){
 	var sHash = window.location.hash;
 	if(sHash!=''){
 		var sId = sHash.substring(1);
-		var oNow = $('.'+sId);		
+		var oNow = $('.'+sId);
 		var iNowIndex = oNow.index();
 		$('.option_list li').eq(iNowIndex).addClass('active').siblings().removeClass('active');
 		oNow.show().siblings().hide();
@@ -102,10 +102,9 @@ $(function(){
 		$(this).find('a')[0].click()
 	})
 
-    // TODO 登录表单提交
+    // 登录表单提交
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
-
         var mobile = $(".login_form #mobile").val()
         var password = $(".login_form #password").val()
 
@@ -129,10 +128,6 @@ $(function(){
             url: "/passport/login",
             type: "post",
             contentType: "application/json",
-            // 在 header 中添加 csrf_token 的随机值
-            headers: {
-                "X-CSRFToken": getCookie('csrf_token')
-            },
             data: JSON.stringify(params),
             success: function (resp) {
                 if (resp.errno == "0") {
@@ -148,9 +143,9 @@ $(function(){
     })
 
 
-    // 注册按钮点击
+    //  注册按钮点击
     $(".register_form_con").submit(function (e) {
-        // 阻止默认提交操作
+        // 阻止默认表单提交操作
         e.preventDefault()
 
 		// 取到用户输入的内容
@@ -178,7 +173,7 @@ $(function(){
             return;
         }
 
-        // 发起注册请求
+        // 准备参数
         var params = {
             "mobile": mobile,
             "smscode": smscode,
@@ -192,7 +187,7 @@ $(function(){
             data: JSON.stringify(params),
             success: function (resp) {
                 if (resp.errno == "0") {
-                    // 代表注册成功
+                    // 代表注册成功就保持登陆
                     location.reload()
                 }else {
                     // 代表注册失败
@@ -202,6 +197,8 @@ $(function(){
                 }
             }
         })
+
+
     })
 })
 
@@ -209,8 +206,11 @@ var imageCodeId = ""
 
 // 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
 function generateImageCode() {
+    // 浏览器要发起图片验证码请求/image_code?imageCodeId=xxxxx
     imageCodeId = generateUUID()
+    // 生成 url
     var url = "/passport/image_code?imageCodeId=" + imageCodeId
+    // 给指定img标签设置src,设置了地址之后，img标签就会去向这个地址发起请求，请求图片
     $(".get_pic_code").attr("src", url)
 }
 
@@ -236,43 +236,50 @@ function sendSMSCode() {
     // 发送短信验证码
     var params = {
         "mobile": mobile,
-        "image_code": imageCode,
+        "image_code":imageCode,
         "image_code_id": imageCodeId
     }
+
+    // 发起注册请求
     $.ajax({
+        // 请求地址
         url: "/passport/sms_code",
+        // 请求方式
         type: "post",
+        // 请求参数
         data: JSON.stringify(params),
+        // 请求参数的数据类型
         contentType: "application/json",
         success: function (response) {
-            if (response.errno == "0"){
+            if (response.errno == "0") {
+                // 代表发送成功
                 var num = 60
                 var t = setInterval(function () {
-                    if (num == 1){
+
+                    if (num == 1) {
+                        // 代表倒计时结束
+                        // 清除倒计时
                         clearInterval(t)
+
+                        // 设置显示内容
                         $(".get_code").html("点击获取验证码")
+                        // 添加点击事件
                         $(".get_code").attr("onclick", "sendSMSCode();");
-                    }
-                    else{
+                    }else {
                         num -= 1
+                        // 设置 a 标签显示的内容
                         $(".get_code").html(num + "秒")
                     }
                 }, 1000)
-            }
-            else{
+            }else {
+                // 代表发送失败
                 alert(response.errmsg)
                 $(".get_code").attr("onclick", "sendSMSCode();");
             }
         }
 
-
     })
-}
 
-function logout() {
-    $.get('/passport/logout', function (resp) {
-        location.reload()
-    })
 }
 
 // 调用该函数模拟点击左侧按钮

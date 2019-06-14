@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from redis import StrictRedis
 from flask_wtf.csrf import generate_csrf
+from info.utils.common import do_index_class
 
 from config import Config, config
 
@@ -38,13 +39,15 @@ def create_app(config_name):
     # CSRFProtect(app)
     Session(app)
 
-    # @app.after_request
-    # def after_request(response):
-    #     # 生成随机的csrf_token的值
-    #     csrf_token = generate_csrf()
-    #     # 设置一个cookie
-    #     response.set_cookie("csrf_token", csrf_token)
-    #     return response
+    app.add_template_filter(do_index_class, "index_class")
+
+    @app.after_request
+    def after_request(response):
+        # 生成随机的csrf_token的值
+        csrf_token = generate_csrf()
+        # 设置一个cookie
+        response.set_cookie("csrf_token", csrf_token)
+        return response
 
     setup_log(config_name)
 
