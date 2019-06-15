@@ -1,10 +1,13 @@
-var currentCid = 0; // 当前分类 id
+var currentCid = 1; // 当前分类 id
 var cur_page = 1; // 当前页
 var total_page = 1;  // 总页数
 var data_querying = true;   // 是否正在向后台获取数据
 
 
 $(function () {
+    // 界面加载完成之后去加载新闻数据
+    updateNewsData()
+
     // 首页分类切换
     $('.menu li').click(function () {
         var clickCid = $(this).attr('data-cid')
@@ -41,6 +44,7 @@ $(function () {
 
         if ((canScrollHeight - nowScroll) < 100) {
             // 判断页数，去更新新闻数据
+
             if (!data_querying) {
                 data_querying = true
 
@@ -63,7 +67,8 @@ function updateNewsData() {
         "page": cur_page
     }
     $.get("/news_list", params, function (resp) {
-         data_querying = false
+        // 数据加载完毕，设置【正在加载数据】的变量为 false 代表当前没有在加载数据
+        data_querying = false
         if (resp.errno == "0") {
             // 给总页数据赋值
             total_page = resp.data.total_page
@@ -72,6 +77,8 @@ function updateNewsData() {
             if (cur_page == 1) {
                 $(".list_con").html("")
             }
+
+            // 添加请求成功之后返回的数据
 
             // 显示数据
             for (var i=0;i<resp.data.news_dict_li.length;i++) {

@@ -36,7 +36,7 @@ def create_app(config_name):
     db.init_app(app)
     global redis_store
     redis_store = redis.StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT, decode_responses=True)
-    # CSRFProtect(app)
+    CSRFProtect(app)
     Session(app)
 
     app.add_template_filter(do_index_class, "index_class")

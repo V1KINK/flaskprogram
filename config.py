@@ -9,7 +9,7 @@ class Config(object):
 
     SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@127.0.0.1:3306/flaskprogram"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
     REDIS_HOST = "127.0.0.1"
     REDIS_PORT = 6379

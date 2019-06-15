@@ -1,5 +1,4 @@
 def do_index_class(index):
-
     if index == 0:
         return "first"
 

@@ -3,14 +3,16 @@ from flask import render_template
 from flask import request
 from flask import session
 
-from info import redis_store
-from info.models import User, News
+# from info import redis_store
+from info import constants
+from info.models import User, News, Category
 from info.utils.response_code import RET
 from . import index_blu
 
 
 @index_blu.route("/news_list")
 def news_list():
+    # 获取首页左侧新闻的
 
     cid = request.args.get("cid", "1")
     page = request.args.get("page", "1")
@@ -35,15 +37,15 @@ def news_list():
         return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
 
     news_model_list = paginate.items
-    total_pages = paginate.pages
+    total_page = paginate.pages
     current_page = paginate.page
 
     news_dict_li = []
     for news in news_model_list:
-        news_dict_li.append(news.to_basic_dict)
+        news_dict_li.append(news.to_basic_dict())
 
     data = {
-        "total_pages": total_pages,
+        "total_page": total_page,
         "current_page": current_page,
         "news_dict_li": news_dict_li
     }
@@ -70,19 +72,26 @@ def index():
         except Exception as e:
             current_app.logger.error(e)
 
-    news_page_list = []
+    # 显示右侧新闻排行
+    news_clicks_list = []
     try:
-        news_page_list = News.query.order_by(News.clicks.desc()).limit(6)
+        news_clicks_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
     except Exception as e:
         current_app.logger.error(e)
 
     news_dict_li = []
-    for news in news_page_list:
+    for news in news_clicks_list:
         news_dict_li.append(news.to_basic_dict())
+
+    categories = Category.query.all()
+    category_list = []
+    for category in categories:
+        category_list.append(category.to_dict())
 
     data = {
         "user": user.to_dict() if user else None,
-        "news_dict_li": news_dict_li
+        "news_dict_li": news_dict_li,
+        "category_li": category_list
     }
 
     return render_template('news/index.html', data=data)

@@ -49,10 +49,10 @@ def login():
     # 1. 获取参数
     params_dict = request.json
     mobile = params_dict.get("mobile")
-    passport = params_dict.get("passport")
+    password = params_dict.get("password")
 
     # 2. 校验参数
-    if not all([mobile, passport]):
+    if not all([mobile, password]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
     # 校验手机号是否正确
@@ -71,7 +71,7 @@ def login():
         return jsonify(errno=RET.NODATA, errmsg="用户不存在")
 
     # 校验登录的密码和当前用户的密码是否一致
-    if not user.check_password(passport):
+    if not user.check_password(password):
         return jsonify(errno=RET.PWDERR, errmsg="用户名或者密码错误")
 
     # 4. 保存用户的登录状态
@@ -79,16 +79,16 @@ def login():
     session["mobile"] = user.mobile
     session["nick_name"] = user.nick_name
 
-    # user.last_login = datetime.now()
+    user.last_login = datetime.now()
 
     # 如果在视图函数中，对模型身上的属性有修改，那么需要commit到数据库保存
     # 但是其实可以不用自己去写 db.session.commit(),前提是对SQLAlchemy有过相关配置
 
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(e)
+    # try:
+    #     db.session.commit()
+    # except Exception as e:
+    #     db.session.rollback()
+    #     current_app.logger.error(e)
 
     # 5. 响应
     return jsonify(errno=RET.OK, errmsg="登录成功")
