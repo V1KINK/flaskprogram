@@ -8,7 +8,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from redis import StrictRedis
 from flask_wtf.csrf import generate_csrf
-from info.utils.common import do_index_class
 
 from config import Config, config
 
@@ -39,6 +38,7 @@ def create_app(config_name):
     CSRFProtect(app)
     Session(app)
 
+    from info.utils.common import do_index_class
     app.add_template_filter(do_index_class, "index_class")
 
     @app.after_request

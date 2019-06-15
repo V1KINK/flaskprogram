@@ -1,4 +1,5 @@
 from flask import current_app, jsonify
+from flask import g
 from flask import render_template
 from flask import request
 from flask import session
@@ -6,6 +7,7 @@ from flask import session
 # from info import redis_store
 from info import constants
 from info.models import User, News, Category
+from info.utils.common import user_login_data
 from info.utils.response_code import RET
 from . import index_blu
 
@@ -54,6 +56,7 @@ def news_list():
 
 
 @index_blu.route("/")
+@user_login_data
 def index():
     # redis_store.set("name", "itcast")
     """
@@ -63,14 +66,15 @@ def index():
     """
     # 显示用户是否登陆的逻辑
     # 取到用户id
-    user_id = session.get("user_id", None)
-    user = None
-    if user_id:
-        # 尝试查询用户的模型
-        try:
-            user = User.query.get(user_id)
-        except Exception as e:
-            current_app.logger.error(e)
+    user = g.user
+    # user_id = session.get("user_id", None)
+    # user = None
+    # if user_id:
+    #     # 尝试查询用户的模型
+    #     try:
+    #         user = User.query.get(user_id)
+    #     except Exception as e:
+    #         current_app.logger.error(e)
 
     # 显示右侧新闻排行
     news_clicks_list = []
