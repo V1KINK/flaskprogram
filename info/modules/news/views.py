@@ -16,7 +16,7 @@ from . import news_blu
 @user_login_data
 def collect_news():
     # 点击收藏
-    user = g.uer
+    user = g.user
     if not user:
         return jsonify(errno=RET.SESSIONERR, errmsg="未登录用户")
 
