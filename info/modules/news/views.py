@@ -59,7 +59,7 @@ def comment_news():
         current_app.logger.error(e)
         db.session.rollback()
 
-    return jsonify(errno=RET.OK, errmsg="OK", comment=comment.to_dict())
+    return jsonify(errno=RET.OK, errmsg="OK", data=comment.to_dict())
 
 
 @news_blu.route("/news_collect", methods=["POST"])
@@ -104,7 +104,7 @@ def collect_news():
     return jsonify(errno=RET.OK, errmsg="操作成功")
 
 
-# 新闻模板渲染
+# 新闻详情模板渲染
 @news_blu.route("/<int:news_id>")
 @user_login_data
 def news_detail(news_id):
@@ -149,11 +149,23 @@ def news_detail(news_id):
         if news in user.collection_news:   # uer.collection_news 为查询对象（sql语句）, 再被用到时才执行
             is_collected = True
 
+    comments = []
+
+    try:
+        comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
+    except Exception as e:
+        current_app.logger.error(e)
+
+    comment_dict_li = []
+    for comment in comments:
+        comment_dict_li.append(comment.to_dict())
+
     data = {
         "user": user.to_dict() if user else None,  # 如果用户登录则 user： user.to_dict, 否则 user = None
         "news_dict_li": news_dict_li,
         "news": news.to_dict(),
-        "is_collected": is_collected
+        "is_collected": is_collected,
+        "comments": comment_dict_li
     }
 
     return render_template("news/detail.html", data=data)
