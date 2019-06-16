@@ -12,6 +12,48 @@ from info.utils.response_code import RET
 from . import news_blu
 
 
+@news_blu.route("/news_collect", methods=["POST"])
+@user_login_data
+def collect_news():
+    # 点击收藏
+    user = g.uer
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="未登录用户")
+
+    news_id = request.json.get("news_id")
+    action = request.json.get("action")
+
+    if not all([news_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    if action not in ["collect", "cancel_collect"]:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        news_id = int(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
+
+    if not news:
+        return jsonify(errno=RET.NODATA, errmu="未查询到新闻数据")
+
+    if action == "collect":
+        if news not in user.collection_news:
+            user.collection_news.append(news)
+    else:
+        if news in user.collection_news:
+            user.collection_news.remove(news)
+
+    return jsonify(errno=RET.OK, errmsg="操作成功")
+
+
 # 新闻模板渲染
 @news_blu.route("/<int:news_id>")
 @user_login_data
@@ -52,7 +94,10 @@ def news_detail(news_id):
 
     is_collected = False
 
-    if
+    if user:
+        # if news in user.collection_news.all():    # uer.collection_news.all() 将数据查询出来返回列表
+        if news in user.collection_news:   # uer.collection_news 为查询对象（sql语句）, 再被用到时才执行
+            is_collected = True
 
     data = {
         "user": user.to_dict() if user else None,  # 如果用户登录则 user： user.to_dict, 否则 user = None
