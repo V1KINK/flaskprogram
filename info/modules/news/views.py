@@ -19,18 +19,16 @@ def comment_like():
     if not user:
         return jsonify(errno=RET.SESSIONERR, errmsg="未登录用户")
 
-    news_id = request.json.get("news_id")
     comment_id = request.json.get("comment_id")
     action = request.json.get("action")
 
-    if not all([news_id, comment_id, action]):
-        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+    if not all([comment_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
 
     if action not in ["add", "remove"]:
-        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+        return jsonify(errno=RET.PARAMERR, errmsg="action参数错误")
 
     try:
-        news_id = int(news_id)
         comment_id = int(comment_id)
     except Exception as e:
         current_app.logger.error(e)
@@ -47,7 +45,7 @@ def comment_like():
 
     if action == "add":
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
-                                                      CommentLike.comment.id).first()
+                                                      CommentLike.comment_id).first()
         if not comment_like_model:
             comment_like_model = CommentLike()
             comment_like_model.user_id = user.id
@@ -55,9 +53,9 @@ def comment_like():
             db.session.add(comment_like_model)
     else:
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
-                                                      CommentLike.comment.id).first()
+                                                      CommentLike.comment_id).first()
         if comment_like_model:
-            comment_like_model.delete()
+            db.session.delete(comment_like_model)
 
     try:
         db.session.commit()
@@ -81,7 +79,7 @@ def comment_news():
     parent_id = request.json.get("parent_id")
 
     if not all([news_id, comment_content]):
-        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
 
     try:
         news_id = int(news_id)
