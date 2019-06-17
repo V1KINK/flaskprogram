@@ -15,6 +15,7 @@ from . import news_blu
 @news_blu.route("/comment_like", methods=["POST"])
 @user_login_data
 def comment_like():
+    # 新闻点赞
     user = g.user
     if not user:
         return jsonify(errno=RET.SESSIONERR, errmsg="未登录用户")
@@ -70,6 +71,7 @@ def comment_like():
 @news_blu.route("/news_comment", methods=["POST"])
 @user_login_data
 def comment_news():
+    # 新闻评论
     user = g.user
     if not user:
         return jsonify(errno=RET.SESSIONERR, errmsg="未登录用户")
@@ -201,9 +203,10 @@ def news_detail(news_id):
 
     if user:
         # if news in user.collection_news.all():    # uer.collection_news.all() 将数据查询出来返回列表
-        if news in user.collection_news:   # uer.collection_news 为查询对象（sql语句）, 再被用到时才执行
+        if news in user.collection_news:  # uer.collection_news 为查询对象（sql语句）, 再被用到时才执行
             is_collected = True
 
+    # 查询评论
     comments = []
 
     try:
@@ -211,9 +214,24 @@ def news_detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
 
+    # 查询当前用户在当前新闻里点赞了哪些评论
+    comment_like_ids = []
+    if user:
+       try:
+            comment_ids = [comment.id for comment in comments]
+            comment_likes = CommentLike.query.filter(CommentLike.user_id == user.id,
+                                                     CommentLike.comment_id.in_(comment_ids)).all()
+            comment_like_ids = [comment_like.comment_id for comment_like in comment_likes]
+        except Exception as e:
+            current_app.logger.error(e)
+
     comment_dict_li = []
     for comment in comments:
-        comment_dict_li.append(comment.to_dict())
+        comment_dict = comment.to_dict()
+        comment_dict["is_like"] = False
+        if comment.id in comment_like_ids:
+            comment_dict["is_like"] = True
+        comment_dict_li.append(comment_dict)
 
     data = {
         "user": user.to_dict() if user else None,  # 如果用户登录则 user： user.to_dict, 否则 user = None
