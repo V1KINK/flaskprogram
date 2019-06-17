@@ -60,6 +60,9 @@ def create_app(config_name):
     from info.modules.news import news_blu
     app.register_blueprint(news_blu)
 
+    from info.modules.profiles import profiles_blu
+    app.register_blueprint(profiles_blu)
+
     return app
 
 

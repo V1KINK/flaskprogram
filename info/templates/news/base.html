@@ -47,21 +47,26 @@
         {% block contentBlock %}
 
         {% endblock %}
-        <div class="rank_con fr">
-            {% block authurBlock %}
 
-            {% endblock %}
-            <div class="rank_title">
-                <h3>点击排行</h3>
+        {% block rankBlock %}
+            <div class="rank_con fr">
+                {% block authurBlock %}
+
+                {% endblock %}
+
+                <div class="rank_title">
+                    <h3>点击排行</h3>
+                </div>
+                <ul class="rank_list">
+                    {% for news in data.news_dict_li %}
+                        <li><span class="{{ loop.index0 | index_class }}">{{ loop.index }}</span><a href="#">{{ news.title }}</a></li>
+                    {% endfor %}
+                </ul>
             </div>
-            <ul class="rank_list">
+        {% endblock %}
 
-                {% for news in data.news_dict_li %}
-                    <li><span class="{{ loop.index0 | index_class }}">{{ loop.index }}</span><a href="#">{{ news.title }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
     </div>
+
     <div class="footer">
         <div class="footer_links">
             <a href="">关于我们</a>

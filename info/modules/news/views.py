@@ -46,17 +46,20 @@ def comment_like():
 
     if action == "add":
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
-                                                      CommentLike.comment_id).first()
+                                                      CommentLike.comment_id == comment_id).first()
         if not comment_like_model:
             comment_like_model = CommentLike()
             comment_like_model.user_id = user.id
             comment_like_model.comment_id = comment_id
             db.session.add(comment_like_model)
+            comment.like_count += 1
+
     else:
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
-                                                      CommentLike.comment_id).first()
+                                                      CommentLike.comment_id == comment_id).first()
         if comment_like_model:
             db.session.delete(comment_like_model)
+            comment.like_count -= 1
 
     try:
         db.session.commit()
@@ -217,7 +220,7 @@ def news_detail(news_id):
     # 查询当前用户在当前新闻里点赞了哪些评论
     comment_like_ids = []
     if user:
-       try:
+        try:
             comment_ids = [comment.id for comment in comments]
             comment_likes = CommentLike.query.filter(CommentLike.user_id == user.id,
                                                      CommentLike.comment_id.in_(comment_ids)).all()
