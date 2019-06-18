@@ -14,6 +14,40 @@ from info.utils.image_storage import storage
 from info.utils.response_code import RET
 
 
+@profiles_blu.route("/collection")
+@user_login_data
+def collection():
+    user = g.user
+    page = request.args.get("p", 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    news_list = []
+    try:
+        paginate = user.collection_news.paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+        current_page = paginate.page
+        total_page = paginate.pages
+        news_list = paginate.items
+    except Exception as e:
+        current_app.logger.error(e)
+
+    news_dict_li = []
+    for news in news_list:
+        news_dict_li.append(news.to_dict())
+
+    data = {
+        "current_page": current_page,
+        "total_page": total_page,
+        "collection": news_dict_li
+    }
+
+    return jsonify(errno=RET.OK, errmsg="OK", data=data)
+
+
 @profiles_blu.route("/pass_info", methods=["GET", "POST"])
 @user_login_data
 def pass_info():
