@@ -1,8 +1,8 @@
 from qiniu import Auth, put_data
 
-access_key = ""
-secret_key = ""
-bucket_name = ""
+access_key = "gXzBF_MkWyY_Q3sgY9uKNautS8W0XIQauC_ebziQ"
+secret_key = "q7UHxQ1fa9MncdK6sf2NM7IRlKjoj9T87ZKSeJMI"
+bucket_name = "1"
 
 
 def storage(data):
