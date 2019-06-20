@@ -7,11 +7,13 @@ from flask import render_template
 from flask import request
 
 from info import constants
-from info.models import User, Category
+from info.models import User, Category, News
 from info.modules.profiles import profiles_blu
 from info.utils.common import user_login_data
 from info.utils.image_storage import storage
 from info.utils.response_code import RET
+
+from info import db
 
 
 # 新闻发布
