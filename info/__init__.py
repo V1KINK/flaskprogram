@@ -50,7 +50,6 @@ def create_app(config_name):
         return render_template("news/404.html",data=data)
 
 
-
     @app.after_request
     def after_request(response):
         # 生成随机的csrf_token的值
@@ -72,6 +71,9 @@ def create_app(config_name):
 
     from info.modules.profiles import profiles_blu
     app.register_blueprint(profiles_blu)
+
+    from info.modules.admin import admin_blu
+    app.register_blueprint(admin_blu, url_prefix="/admin")
 
     return app
 
