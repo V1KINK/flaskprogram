@@ -1,0 +1,27 @@
+{% extends "news/base.html"%}
+
+{% block titleBlock %}
+    404
+{% endblock %}
+
+{% block categoryBlock %}
+<div class="user_btns fr">
+    <a href="javascript:;" class="login_btn">登录</a> / <a href="javascript:;" class="register_btn">注册</a>
+</div>
+{% endblock %}
+
+{% block  contentBlock%}
+<div class="error_con">
+    <img src="../../static/news/images/not_found.png" alt="404">
+    <h3>OOPS!</h3>
+    <h4>该内容不存在</h4>
+    <p>请检查你输入的网址是否正确，请点击以下按钮返回主页或者发送错误报告</p>
+    <a href="index.html">返回首页</a>
+</div>
+{% endblock %}
+
+{% block rankBlock %}
+{% endblock %}
+
+{% block footerBlock %}
+{% endblock %}
