@@ -18,6 +18,12 @@ def index():
 @admin_blu.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
+
+        user_id = session.get("user_id", None)
+        is_admin = session.get("is_admin", False)
+        if user_id and is_admin:
+            return redirect(url_for("admin.index"))
+
         return render_template("admin/login.html")
 
     username = request.form.get("username")
