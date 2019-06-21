@@ -30,6 +30,7 @@ def logout():
     session.pop('user_id', None)
     session.pop('mobile', None)
     session.pop('nick_name', None)
+    session.pop('is_admin', False)
 
     return jsonify(errno=RET.OK, errmsg="退出成功")
 
@@ -56,8 +57,8 @@ def login():
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
     # 校验手机号是否正确
-    if not re.match('1[35678]\\d{9}', mobile):
-        return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
+    # if not re.match('1[35678]\\d{9}', mobile):
+    #     return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
 
     # 3. 校验密码是否正确
     # 先查询出当前是否有指定手机号的用户
