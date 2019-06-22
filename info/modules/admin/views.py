@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timedelta
 
-from flask import current_app
+from flask import current_app, jsonify
 from flask import g
 from flask import redirect
 from flask import render_template
@@ -9,9 +9,46 @@ from flask import request
 from flask import session
 from flask import url_for
 
+from info import constants
 from info.models import User
 from info.utils.common import user_login_data
 from . import admin_blu
+
+
+@admin_blu.route("/user_list")
+def user_list():
+    page = request.args.get("page", 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    users = []
+    current_page = 1
+    total_page = 1
+
+    try:
+        paginate = User.query.filter(User.is_admin == False).paginate(page, constants.ADMIN_USER_PAGE_MAX_COUNT, False)
+        users = paginate.items
+        current_page = paginate.page
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+
+    user_dict_li = []
+
+    for user in users:
+        user_dict_li.append(user.to_dict())
+
+    data = {
+        "current_page": current_page,
+        "total_page": total_page,
+        "users": user_dict_li
+    }
+
+    return render_template("admin/user_list.html", data=data)
 
 
 @admin_blu.route("/user_count")
@@ -49,7 +86,8 @@ def user_count():
     for i in range(0, 31):
         begin_date = begin_today_data - timedelta(i)
         end_date = begin_today_data - timedelta(i - 1)
-        count = User.query.filter(User.is_admin == False, User.create_time >= begin_date, User.create_time < end_date).count()
+        count = User.query.filter(User.is_admin == False, User.create_time >= begin_date,
+                                  User.create_time < end_date).count()
         active_count.append(count)
         active_time.append(begin_date.strftime("%Y-%m-%d"))
 
