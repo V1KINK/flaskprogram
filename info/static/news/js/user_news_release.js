@@ -9,11 +9,6 @@ $(function () {
     $(".release_form").submit(function (e) {
         e.preventDefault()
 
-        // 发布完毕之后需要选中我的发布新闻
-        // // 选中索引为6的左边单菜单
-        // window.parent.fnChangeMenu(6)
-        // // 滚动到顶部
-        // window.parent.scrollTo(0, 0)
         $(this).ajaxSubmit({
             url: "/profiles/news_release",
             type: "POST",

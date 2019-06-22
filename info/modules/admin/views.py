@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timedelta
 
-from flask import current_app
+from flask import current_app, jsonify
 from flask import g
 from flask import redirect
 from flask import render_template
@@ -12,7 +12,41 @@ from flask import url_for
 from info import constants
 from info.models import User, News
 from info.utils.common import user_login_data
+from info.utils.response_code import RET
 from . import admin_blu
+
+
+@admin_blu.route("/news_review_action", methods=["POST"])
+def news_review_action():
+    news_id = request.json.get("news_id")
+    action = request.json.get("action")
+
+    if not all([news_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    if action not in ["accept", "reject"]:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if not news:
+        return jsonify(errno=RET.DBERR, errmsg="未查询到新闻数据")
+
+    if action == "accept":
+        news.status = 0
+        print(news.status)
+    else:
+        reason = request.json.get("reason")
+        if not reason:
+            return jsonify(errno=RET.PARAMERR, errmsg="请输入原因")
+        news.reason = reason
+        news.status = -1
+
+    return jsonify(errno=RET.OK, errmsg="OK")
 
 
 @admin_blu.route("/news_review_detail.html/<int:news_id>")

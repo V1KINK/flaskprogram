@@ -15,6 +15,7 @@
         </div>
         <div class="pannel">
             <form class="news_review">
+
             <div class="form_group">
                 <label>新闻标题：</label>
                 <input type="text" class="input_txt2" value="{{ data.news.title }}" readonly>
@@ -37,9 +38,24 @@
                     <input class="input_area" id="rich_content" name="content" value="{{ data.news.content }}"></input>
                 </div>
             </div>
-            </form>    
+
+            <div class="form_group indent_group">
+                <input type="radio" name="action" checked="" value="accept"> 通过&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="action" value="reject"> 拒绝通过
+            </div>
+            <div class="form_group group_hide">
+                <label>拒绝原因：</label>
+                <textarea class="input_multxt" name="reason"></textarea>
+            </div>
+            <div class="form_group indent_group line_top">
+                <input type="submit" value="确定" class="confirm">
+                <input type="button" value="取消" class="cancel" onclick="cancel()">
+            </div>
+            <!-- 隐藏字段，用于记录当前新闻id -->
+            <input name="news_id" value="{{ data.news.id }}" hidden>
+            </form>
         </div>
-        
+
         <script>
         $(function(){
             var $radio = $('input[name="action"]');
@@ -67,8 +83,8 @@
                 nonbreaking_force_tab: true,
                 readonly:1
             });
-            
-            })        
-        </script>    
+
+            })
+        </script>
 </body>
 </html>
