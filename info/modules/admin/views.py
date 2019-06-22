@@ -18,6 +18,7 @@ from . import admin_blu
 @admin_blu.route('/news_review')
 def news_review():
     page = request.args.get("p", 1)
+    keyword = request.args.get("keyword", None)
     try:
         page = int(page)
     except Exception as e:
@@ -28,8 +29,12 @@ def news_review():
     current_page = 1
     total_page = 1
 
+    filters = [News.status != 0]
+    if keyword:
+        filters.append(News.title.contains(keyword))
+
     try:
-        paginate = News.query.filter(News.status != 0) \
+        paginate = News.query.filter(*filters) \
             .order_by(News.create_time.desc()) \
             .paginate(page, constants.ADMIN_NEWS_PAGE_MAX_COUNT, False)
 
